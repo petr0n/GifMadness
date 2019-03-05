@@ -10,19 +10,38 @@
 </head>
 <body>
 <div class="message"></div>
+<header class="container">
+	<div class="row">
+		<div class="col-sm-12">
+			<h1>GifMadness</h1>
+		</div>
+	</div>
+</header>
 <div class="wrapper">
 	<div class="container">
-		<header class="row">
-			<div class="col-sm-12">
-				<h1>GifMadness</h1>
-			</div>
-		</header>
 		<div class="row">
-			
+			<div class="col-md-9 gif-main">
+				<h2>Gifs</h2>
+				<div class="gif-container"></div>
+				<a href="add" class="add-more">Add more GIFS!</a>
+			</div>
+			<div class="col-md-3">
+				<h2>Madness</h2>
+				<hr>
+				<label for="addGif">
+					Add Gif to the madness<br>
+					<input type="text" name="newgif" id="newgif">
+				</label>
+				<button id="submit-newgif">Submit</button>
+				<hr>
+				<div class="gif-buttons"></div>
+			</div>
 		</div>
 	</div>
 </div>
-
+<footer>
+	&copy; GIFMADNESS by Peter Abeln - courtsey of <a href="https://giphy.com" target="_blank">giphy.com</a>
+</footer>
 <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
 <script src="assets/js/giphy.js"></script>
 </body>
