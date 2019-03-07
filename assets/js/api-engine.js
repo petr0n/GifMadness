@@ -139,8 +139,8 @@ $(document).ready(function() {
     // });
     // gifMadness();
 
-    let tabs = {
-        'tab1': {
+    let tabs = [
+        {
             'name': 'gifs',
             'topics': [
                 'pizza',
@@ -159,7 +159,7 @@ $(document).ready(function() {
             'limit': 9,
             'offset': 0
         },
-        'tab2': {
+        {
             'name': 'news',
             'topics': [
                 'economy',
@@ -171,9 +171,9 @@ $(document).ready(function() {
             ],
             'apiUrl': 'https://newsapi.org/v2/everything?apiKey=7a6e6d25f7614f219e252f2307d31182',
             'limit': 9,
-            'offset': 0
+            'offset': 10
         },
-        'tab3': {
+        {
             'name': 'movies',
             'topics': [
                 'The Matrix', 
@@ -186,10 +186,9 @@ $(document).ready(function() {
             'limit': 9,
             'offset': 0
         }
-    }
+    ]
 
     function setupTabs(){
-
         Object.keys(tabs).forEach(function(key, index){
             let topics = tabs[key].topics;
             let name = tabs[key].name;
@@ -199,21 +198,20 @@ $(document).ready(function() {
             }
             apiUrl = tabs[key].apiUrl;
             tabsInit(name, topics, tabs[key].apiUrl, tabs[key].limit, tabs[key].offset);
-
         });
     }
     setupTabs();
     function tabsInit(name, topics, apiUrl, limit, offset){
-        initTabButtons(name, topics, apiUrl, limit, offset);
+        initTopicButtons(name, topics, apiUrl, limit, offset);
         getApiData(name, topics[0], apiUrl, limit, offset);
-        // getNewGifs();
+        
         // loadMoreGifs();
     }
 
-    function initTabButtons(name, topics, apiUrl, limit, offset){
+    function initTopicButtons(name, topics, apiUrl, limit, offset){
         let topicBtnsEl = $('#' + name).find('.topic-buttons');
         topicBtnsEl.empty();
-        //console.log(topics);
+        console.log(topics);
         localStorage.setItem(name + 'Topics', JSON.stringify(topics))
         topics.map(function(topic) {
             let btnEl = $('<button>');
@@ -221,7 +219,6 @@ $(document).ready(function() {
                 .appendTo(topicBtnsEl)
                 .on('click', function(e){
                     e.preventDefault();
-                    //getGifs($(this).text(), getLimit, giphyOffset);
                     getApiData(name, topic, apiUrl, limit, offset);
                 });
         });
@@ -229,14 +226,13 @@ $(document).ready(function() {
 
 
     function getApiData(name, topic, apiUrl, limit, offset){
-        // localStorage.setItem('giphyTopic', topic);
         let ajaxUrl = apiUrl;
         switch(name){
             case 'gifs':
-                ajaxUrl += '&q=' + topic + '&limit=' + limit + '&offset';
+                ajaxUrl += '&q=' + topic + '&limit=' + limit + '&offset=' + offset;
                 break;
             case 'news':
-                ajaxUrl += '&q=' + topic + '&limit=' + limit + '&offset';
+                ajaxUrl += '&q=' + topic + '&limit=' + limit + '&pageSize=' + offset;
                 break;
             case 'movies':
                 ajaxUrl += '&t=' + topic;
@@ -248,63 +244,122 @@ $(document).ready(function() {
             'method': 'GET'
         })
         .then(function(response){
-            console.log(response);
             switch(name){
                 case 'gifs':
-                    renderGifs(response);
+                    //console.log(name);
+                    renderGifs(response, offset);
                     break;
                 case 'news':
-                    renderNews(response);
+                    renderNews(response, offset);
                     break;
                 case 'movies':
-                    renderMovies(response);
+                    renderMovies(response, offset);
                     break;
             }
         });
         
     }
 
-    function renderGifs(res) {
+    function renderGifs(res, offset) {
         let giphyData = res.data;
+        // console.log(giphyData);
         if(!offset){
             $('#gifs .results-container').empty();
         }
-        Object.keys(giphyData).forEach(function(key, index){
-            // console.log(giphyData[key]);
-            let divEl = $('<div>').addClass('gif-block');
-            let title = giphyData[key].title.trim() != '' ? giphyData[key].title : 'no title';
+        giphyData.map(function(gif){
+            let divEl = $('<div>').addClass('result-block');
+            let title = gif.title.trim() != '' ? gif.title : 'no title';
             let titleEl = $('<h4>').text(title);
-            let metaEl = $('<p>').text('Rated: ' + giphyData[key].rating);
-            let source = giphyData[key].source_tld;
-            source = source.length > 22 ? source.substr(0,22) + '...' : giphyData[key].source_tld;
-            metaEl.append('<br><span title="' + giphyData[key].source_tld + '">Source: ' + source + '</span>');
+            let metaEl = $('<p>').text('Rated: ' + gif.rating);
+            let source = gif.source_tld;
+            source = source.length > 22 ? source.substr(0,22) + '...' : gif.source_tld;
+            metaEl.append('<br><span title="' + gif.source_tld + '">Source: ' + source + '</span>');
             let imgEl = $('<img>').attr('data-state', 'still').addClass('gif');
-            imgEl.attr('data-still', giphyData[key].images.fixed_width_still.url);
-            imgEl.attr('data-animate', giphyData[key].images.fixed_width.url);
-            imgEl.attr('src', giphyData[key].images.fixed_width_still.url);
+            imgEl.attr('data-still', gif.images.fixed_width_still.url);
+            imgEl.attr('data-animate', gif.images.fixed_width.url);
+            imgEl.attr('src', gif.images.fixed_width_still.url);
             imgEl.on('click', animateGif);
             divEl.append(titleEl).append(metaEl).append(imgEl);
+            
             $('#gifs .results-container').append(divEl);
+            
         });
     }
 
-    function renderNews(res) {
-        let newsData = res.data;
+    function animateGif(){
+        let btn = $(this);
+        if (btn.attr('data-state') === 'still') {
+            btn.attr('src', btn.attr('data-animate'));
+            btn.attr('data-state', 'animated');
+        } else {
+            btn.attr('src', btn.attr('data-still'));
+            btn.attr('data-state', 'still');
+        }
+    }
+
+    function renderNews(res, offset) {
+        let newsData = res.articles;
         if(!offset){
             $('#news .results-container').empty();
         }
-        Object.keys(newsData).forEach(function(key, index){
+        console.log(newsData);
+        newsData.map(function(news){
+            let divEl = $('<div>').addClass('result-block two-wide');
+            let title = news.title.trim() != '' ? news.title : 'no title';
+            let titleEl = $('<h4>').text(title);
+
+            let metaEl = $('<p>').text('Published: ' + news.publishedAt);
+            let source = news.source.name;
+            source = source.length > 22 ? source.substr(0,22) + '...' : news.source.name;
+            metaEl.append('<br><span title="' + news.source.name + '">Source: ' + source + '</span>');
+            let content = news.content;
+            content = content.length > 180 ? content.substr(0,180) + '...' : news.content;
+            let contentEl = $('<p>').text(content);
+            // let imgEl = $('<img>').attr('data-state', 'still').addClass('gif');
+            // imgEl.attr('data-still', gif.images.fixed_width_still.url);
+            // imgEl.attr('data-animate', gif.images.fixed_width.url);
+            // imgEl.attr('src', gif.images.fixed_width_still.url);
+            // imgEl.on('click', animateGif);
+            divEl.append(titleEl).append(metaEl).append(contentEl);
+            $('#news .results-container').append(divEl);
         });
+        // publishedAt, url, source.name
     }
 
-    function renderMovies(res) {
+    function renderMovies(res, offset) {
         let newsData = res.data;
         if(!offset){
             $('#movies .results-container').empty();
         }
-        Object.keys(newsData).forEach(function(key, index){
-        });
+
+        // $('#gifs .results-container').append(divEl);
+        // Object.keys(newsData).forEach(function(key, index){
+        // });
     }
 
+
+    function getNewTopic(){
+        $('.submit-new').on('click', function(e){
+            e.preventDefault();
+            let tabPaneId = $(this).closest('.tab-pane').attr('id');
+            newTopicEl = $('#' + tabPaneId).find('.new-topic');
+            newTopic = newTopicEl.val();
+            let tabObj = tabs.find(obj => { return obj.name === tabPaneId });
+            let tabTopics = tabObj.topics;
+            console.log(tabs);
+            console.log(tabTopics);
+            if (newTopic.length) {
+                if (!tabTopics.includes(newTopic)){
+                    tabTopics.splice(0, 0, newTopic);
+                }
+                newTopicEl.val('');
+                getApiData(tabPaneId, newTopic, tabObj.apiUrl, tabObj.limit, tabObj.offset);
+                initTopicButtons(tabPaneId, tabTopics, tabObj.apiUrl, tabObj.limit, tabObj.offset);
+            } else {
+                alert('nothing entered');
+            }
+        })
+    }
+    getNewTopic();
 
 });

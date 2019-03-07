@@ -10,19 +10,30 @@
 }
 
 body {
-    font-family: 'Oswald', sans-serif;
+    font-family: 'Cabin', sans-serif;
 }
 
 h1, h2, h3, h4, h5 {
-    font-family: 'Luckiest Guy', cursive;
+    font-family: 'Cabin', sans-serif;
     color: var(--main-gray-dk);
 }
 
 header {
-    padding: 40px;
+    display: flex;
     color: var(--main-blue);
+    justify-content: space-between;
+    padding: 40px;
     text-align: center;
 }
+header nav li {
+    padding: 1px 20px;
+}
+header nav li a.active{
+    color: red;
+}
+
+
+
 .wrapper {
     margin-bottom: 50px;
 }
@@ -30,28 +41,33 @@ header {
 .gif-main h2 {
     text-align: center;
 }
-.gif-container {
+.results-container {
     align-items: flex-start;
     display: flex;
     flex-wrap: wrap;
     justify-content: space-between;
     margin-bottom: 30px;
 }
-.gif-container .gif-block {
+.results-container .result-block {
     background-color: #F8F8F8;
     border: 1px solid var(--main-gray);
     border-radius: 3px;
     height: 300px;
-    margin: 0 20px 45px;
+    margin: 0 10px 45px;
     padding: 15px;
     overflow: hidden;
-    width: 28%;
+    width: 30%;
 }
-.gif-block h4 {
+.results-container .result-block.two-wide {
+    width: 47%;
+}
+.result-block h4 {
     height: 76px;
     overflow: hidden;
 }
-
+.result-block.two-wide h4 {
+    height: 85px;
+}
 .add-more {
     background: linear-gradient(#F8F8F8 0%, #DADAD9 100%) no-repeat 50% 50% / 100% 100%;
     border: 1px solid #ccc;
@@ -87,4 +103,20 @@ footer {
     height: 40px;
     line-height: 2.4;
     text-align: center;
+}
+
+.tabs ul {
+    list-style: none;
+}
+.tabs ul li {
+    display: inline;
+}
+.tabs ul li a.active {
+    font-weight: bold;
+}
+.tab-pane {
+    display: none;
+}
+.tab-pane.active {
+    display: block;
 }
